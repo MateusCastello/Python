@@ -22,8 +22,6 @@ for i in range(1, n_numbers+1):
 
 print(password)
 
-
-
 #In random order
 pass_list = []
 
