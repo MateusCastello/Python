@@ -5,14 +5,12 @@ numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 symbols = ['!', '#', '$', '%', '&', '(', ')', '*', '+']
 
 print("Welcome to the PyssWord, password generator")
-n_letters = int(input("How many letters you want in your password?: \n"))
-n_symbols = int(input(f"How many symbols would you like?: \n"))
-n_numbers = int(input(f"How many numbers would you like?: \n"))
-
-pass_size = n_letters + n_symbols + n_numbers
-password = ""
+n_letters = int(input("How many letters you want in your password?: "))
+n_symbols = int(input(f"How many symbols would you like?: "))
+n_numbers = int(input(f"How many numbers would you like?: "))
 
 #In order of character addition
+password = ""
 for i in range(1, n_letters+1):
     password += random.choice(letters)
 
