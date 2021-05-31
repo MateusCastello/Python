@@ -35,6 +35,3 @@ for item in pass_list:
     password_s += item
 
 print(password_s)
-
-
-
