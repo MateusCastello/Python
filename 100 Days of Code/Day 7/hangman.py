@@ -6,6 +6,7 @@ display_word = []
 for i in range(len(chosen_word)):
     display_word += "_"
 
+letters_track = []
 lives = 6
 has_won = False
 
@@ -15,13 +16,19 @@ print(hangman_art.stages[lives])
 print(display_word)
 
 while lives > 0 and has_won == False:
-    guess = input("Guess a letter: ").lower()
+    guess = input("Guess a letter: ").lower()    
     index = 0
+
+    if guess in letters_track:
+        print(f"You have already guessed the letter {guess}")
+        print(letters_track)
+        continue
 
     if guess not in chosen_word:
         lives -= 1
         print(hangman_art.stages[lives]) 
-        print(display_word)       
+        print(display_word)
+        letters_track.append(guess)       
         print("The letter is not in the word!")
         continue
 
@@ -32,10 +39,12 @@ while lives > 0 and has_won == False:
 
     print(hangman_art.stages[lives])
     print(display_word)
+    letters_track.append(guess)
 
     if "_" not in display_word:
         has_won = True
         print("You won!! Congrats")    
     
 if lives == 0:
+        print(f"The word was {chosen_word}")
         print("You lose!")
