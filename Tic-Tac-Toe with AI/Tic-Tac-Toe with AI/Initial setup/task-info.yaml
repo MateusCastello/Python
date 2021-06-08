@@ -1,0 +1,395 @@
+type: edu
+custom_name: stage1
+files:
+- name: test/enum.py
+  visible: false
+  text: |
+    from enum import Enum
+    from hstest import WrongAnswer
+
+
+    class GameState(Enum):
+        X_WIN = 'X_WIN'
+        O_WIN = 'O_WIN'
+        DRAW = 'DRAW'
+        NOT_FINISHED = 'NOT_FINISHED'
+
+
+    class CellState(Enum):
+        X = 'X'
+        O = 'O'
+        EMPTY = ' '
+
+        @classmethod
+        def get(cls, char: str):
+
+            char_to_cell_state = {
+                'X': cls.X,
+                'O': cls.O,
+                ' ': cls.EMPTY,
+                '_': cls.EMPTY
+            }
+
+            if char not in char_to_cell_state:
+                raise WrongAnswer('Bad symbol ' + char + ' in the game grid')
+            return char_to_cell_state[char]
+
+        @classmethod
+        def get_opponent(cls, player):
+            if player == CellState.X:
+                return CellState.O
+            if player == CellState.O:
+                return CellState.X
+            raise Exception('Wrong method argument!')
+  learner_created: false
+- name: test/grid.py
+  visible: false
+  text: |
+    from hstest import WrongAnswer
+    from test.minimax import Position
+    from test.enum import CellState, GameState
+    from copy import copy
+
+
+    class Grid:
+        def __init__(self):
+            self.__grid = [[CellState.EMPTY for _ in range(3)] for _ in range(3)]
+
+        def get_grid(self):
+            return self.__grid
+
+        @classmethod
+        def from_line(cls, line):
+            if len(line) != 9:
+                raise WrongAnswer("Wrong input length. Expected 9.\nFound " + str(len(line)))
+
+            grid = Grid()
+
+            for i, char in enumerate(line):
+                grid.__grid[(int(i / 3))][i % 3] = CellState.get(char)
+
+            return grid
+
+        @classmethod
+        def from_output(cls, string_field: str, field_number: int = 1):
+            grid = Grid()
+
+            field_lines = list(map(str.strip, string_field.splitlines()))
+            field_lines = list(filter(lambda field_line:
+                                      str(field_line).startswith('|') and str(field_line).endswith('|'),
+                                      field_lines))
+
+            if len(field_lines) < 3 * field_number:
+                raise WrongAnswer("Expected not less than " + str(field_number) + " grids in the output!\n" +
+                                  "Make sure you print the game grids in the correct format!")
+
+            field_lines = field_lines[field_number * 3 - 3:field_number * 3]
+
+            for i, line in enumerate(field_lines):
+                if len(line) != 9:
+                    raise WrongAnswer("Can't parse the game field. The following line has wrong length:\n" + line)
+                for j in range(3):
+                    grid.__grid[i][j] = CellState.get(line[j * 2 + 2])
+
+            return grid
+
+        @classmethod
+        def all_grids_from_output(cls, string_field: str):
+
+            grid_list = list()
+
+            field_lines = list(map(str.strip, string_field.splitlines()))
+            field_lines = list(filter(lambda field_line:
+                                      str(field_line).startswith('|') and str(field_line).endswith('|'),
+                                      field_lines))
+
+            if len(field_lines) % 3 != 0:
+                raise WrongAnswer(
+                    "Wrong grid output format! Each grid should contain 3 lines that starts and ends with '|' symbol!")
+
+            for i in range(len(field_lines) // 3):
+                grid_lines = field_lines[i * 3:i * 3 + 3]
+
+                grid = Grid()
+
+                for j, line in enumerate(grid_lines):
+                    if len(line) != 9:
+                        raise WrongAnswer("Can't parse the game field. The following line has wrong length:\n" + line)
+                    for k in range(3):
+                        grid.__grid[j][k] = CellState.get(line[k * 2 + 2])
+
+                grid_list.append(grid)
+
+            return grid_list
+
+        @classmethod
+        def get_move(cls, from_grid, to_grid):
+            for i in range(3):
+                for j in range(3):
+                    if from_grid.__grid[i][j] != to_grid.__grid[i][j]:
+                        return Position(i, j)
+            raise WrongAnswer("After making a move the grid was the same!")
+
+        def is_win(self, player) -> bool:
+            for i in range(3):
+                if self.__grid[i][0] == self.__grid[i][1] and self.__grid[i][1] == self.__grid[i][2] and self.__grid[i][
+                    2] == player:
+                    return True
+
+            for i in range(3):
+                if self.__grid[0][i] == self.__grid[1][i] and self.__grid[1][i] == self.__grid[2][i] and self.__grid[2][
+                    i] == player:
+                    return True
+
+            return (self.__grid[0][0] == self.__grid[1][1] and self.__grid[1][1] == self.__grid[2][2] and self.__grid[2][
+                2] == player) or (self.__grid[2][0] == self.__grid[1][1] and self.__grid[1][1] == self.__grid[0][2] and
+                                  self.__grid[0][2] == player)
+
+        def has_empty_cells(self):
+            for cells in self.__grid:
+                for cell in cells:
+                    if cell == CellState.EMPTY:
+                        return True
+
+        def get_num_of_empty_cells(self):
+            result = 0
+            for cells in self.__grid:
+                for cell in cells:
+                    if cell == CellState.EMPTY:
+                        result += 1
+            return result
+
+        def get_game_state(self):
+            if self.is_win(CellState.X):
+                return GameState.X_WIN
+            if self.is_win(CellState.O):
+                return GameState.O_WIN
+            if self.has_empty_cells():
+                return GameState.NOT_FINISHED
+            return GameState.DRAW
+
+        def set_cell(self, x, y, cell_state):
+            self.__grid[x][y] = cell_state
+
+        def is_correct_next_grid(self, grid):
+            return self.get_num_of_empty_cells() - grid.get_num_of_empty_cells() == 1
+
+        def is_valid_grid(self):
+            num_of_o = 0
+            num_of_x = 0
+            for cells in self.__grid:
+                for cell in cells:
+                    if cell == CellState.O:
+                        num_of_o += 1
+                    elif cell == CellState.X:
+                        num_of_x += 1
+            return abs(num_of_x - num_of_o) <= 1
+
+        @classmethod
+        def check_grid_sequence(cls, grids):
+
+            if len(grids) <= 1:
+                return
+
+            for i in range(1, len(grids) - 1):
+                prev_grid = grids[i - 1]
+                grid = grids[i]
+
+                if not grid.is_valid_grid():
+                    raise WrongAnswer(
+                        "Impossible grid was printed! The difference between Os and Xs in the grid is greater than 1:\n" + str(
+                            grid))
+
+                if not prev_grid.is_correct_next_grid(grid):
+                    raise WrongAnswer("After making a move on grid\n" + str(prev_grid) + "\n it can't become\n" + str(grid))
+
+                last_grid = grids[-1]
+
+                if last_grid.get_game_state() == GameState.NOT_FINISHED:
+                    raise WrongAnswer("Last grid is not terminal!\n" + str(last_grid))
+
+        def __str__(self):
+            result = '---------\n'
+            for cell in self.__grid:
+                result += '| {} {} {} |\n'.format(cell[0].value, cell[1].value, cell[2].value)
+            result += '---------'
+            return result
+
+        def __eq__(self, other):
+            if type(self) != type(other):
+                return False
+
+            for i in range(9):
+                if self.__grid[int(i / 3)][i % 3] != other.__grid[int(i / 3)][i % 3]:
+                    return False
+            return True
+  learner_created: false
+- name: test/minimax.py
+  visible: false
+  text: |
+    from test.enum import GameState, CellState
+
+
+    class Position:
+
+        def __init__(self, x: int, y: int):
+            self.x = x
+            self.y = y
+
+        def __str__(self):
+            return str(self.x) + " " + str(self.y)
+
+        def __eq__(self, other):
+            return other.x == self.x and other.y == self.y
+
+
+    class Minimax:
+
+        @classmethod
+        def minimax(cls, grid, player, is_maximize, start_player, depth):
+
+            game_state = grid.get_game_state()
+
+            if game_state == GameState.X_WIN:
+                return 10 - depth if start_player == CellState.X else depth - 10
+            elif game_state == GameState.O_WIN:
+                return 10 - depth if start_player == CellState.O else depth - 10
+            elif game_state == GameState.DRAW:
+                return 0
+
+            best_score = -999 if is_maximize else 999
+
+            for i in range(3):
+                for j in range(3):
+                    if grid.get_grid()[i][j] == CellState.EMPTY:
+                        grid.set_cell(i, j, player)
+                        score = cls.minimax(grid, CellState.get_opponent(player), not is_maximize, start_player, depth + 1)
+                        grid.set_cell(i, j, CellState.EMPTY)
+                        best_score = max(best_score, score) if is_maximize else min(best_score, score)
+
+            return best_score
+
+        @classmethod
+        def get_move(cls, grid, player):
+            best_score = -999
+            best_position = None
+
+            for i in range(3):
+                for j in range(3):
+                    if grid.get_grid()[i][j] == CellState.EMPTY:
+                        grid.set_cell(i, j, player)
+                        score = cls.minimax(grid, CellState.get_opponent(player), False, player, 1)
+                        grid.set_cell(i, j, CellState.EMPTY)
+                        if score > best_score:
+                            best_score = score
+                            best_position = Position(i, j)
+
+            return best_position
+
+        @classmethod
+        def get_available_positions(cls, grid, player):
+
+            positions = list()
+
+            for i in range(3):
+                for j in range(3):
+                    if grid.get_grid()[i][j] == CellState.EMPTY:
+                        grid.set_cell(i, j, player)
+                        score = cls.minimax(grid, CellState.get_opponent(player), False, player, 1)
+                        if score >= 0:
+                            positions.append(Position(i, j))
+                        grid.set_cell(i, j, CellState.EMPTY)
+
+            return positions
+  learner_created: false
+- name: test/__init__.py
+  visible: false
+  learner_created: false
+- name: tests.py
+  visible: false
+  text: |
+    from hstest import CheckResult, StageTest, dynamic_test, TestedProgram
+
+    from test.grid import Grid
+
+
+    class Test:
+        def __init__(self, inp, result, state, additional_contains=None):
+            self.inp = inp
+            self.result = result
+            self.state = state
+            self.additional_contains = additional_contains
+
+
+    class TicTacToeTests(StageTest):
+        test_cases = [
+            Test("_XXOO_OX_\n1 1", "XXXOO_OX_", "X wins"),
+            Test("_XXOO_OX_\n1 3\n1 1", "XXXOO_OX_", "X wins", "This cell is occupied! Choose another one!"),
+            Test("_XXOO_OX_\n1 4\n1 1", "XXXOO_OX_", "X wins", "Coordinates should be from 1 to 3!"),
+            Test("_XXOO_OX_\none\n1 1", "XXXOO_OX_", "X wins", "You should enter numbers!"),
+            Test("_XXOO_OX_\none three\n1 1", "XXXOO_OX_", "X wins", "You should enter numbers!"),
+            Test("_XXOO_OX_\n2 3", "_XXOOXOX_", "Game not finished"),
+            Test("_XXOO_OX_\n3 3", "_XXOO_OXX", "Game not finished"),
+            Test("XX_XOXOO_\n1 3", "XXOXOXOO_", "O wins"),
+            Test("XX_XOXOO_\n3 3", "XX_XOXOOO", "O wins"),
+            Test("_XO_OX___\n1 1", "XXO_OX___", "Game not finished"),
+            Test("_XO_OX___\n2 1", "_XOXOX___", "Game not finished"),
+            Test("_XO_OX___\n3 1", "_XO_OXX__", "Game not finished"),
+            Test("_XO_OX___\n3 2", "_XO_OX_X_", "Game not finished"),
+            Test("_XO_OX___\n3 3", "_XO_OX__X", "Game not finished"),
+            Test("_XO_OX__X\n1 1", "OXO_OX__X", "Game not finished"),
+            Test("_XO_OX__X\n2 1", "_XOOOX__X", "Game not finished"),
+            Test("_XO_OX__X\n3 1", "_XO_OXO_X", "O wins"),
+            Test("_XO_OX__X\n3 2", "_XO_OX_OX", "Game not finished"),
+            Test("XO_OXOX__\n1 3", "XOXOXOX__", "X wins"),
+            Test("XO_OXOX__\n3 2", "XO_OXOXX_", "Game not finished"),
+            Test("XO_OXOX__\n3 3", "XO_OXOX_X", "X wins"),
+        ]
+
+        @dynamic_test(data=test_cases)
+        def test_grid_output(self, test):
+            program = TestedProgram()
+            program.start()
+
+            output = program.execute(test.inp)
+
+            grid = Grid.from_line(test.inp.split('\n')[0])
+            output_grid = Grid.from_output(output)
+
+            if grid != output_grid:
+                return CheckResult.wrong("The printed grid is not equal to the input grid!\n"
+                                         "Correct grid:\n\n" + str(grid))
+
+            if test.additional_contains is not None and test.additional_contains not in output:
+                return CheckResult.wrong("'{}' expected in the output!".format(test.additional_contains))
+
+            result_grid = Grid.from_output(output, 2)
+            correct_result_grid = Grid.from_line(test.result)
+
+            if result_grid != correct_result_grid:
+                return CheckResult.wrong(
+                    f"The printed result grid is not correct!\nCorrect result grid:\n\n {correct_result_grid}")
+
+            if test.state not in output:
+                return CheckResult.wrong(f"The game result is wrong. Expected result '{test.state}'")
+
+            return CheckResult.correct()
+
+
+    if __name__ == '__main__':
+        TicTacToeTests().run_tests()
+  learner_created: false
+- name: tictactoe.py
+  visible: true
+  text: |
+    # write your code here
+  learner_created: false
+- name: winner.py
+  visible: true
+  learner_created: true
+feedback_link: https://hyperskill.org/projects/82/stages/452/implement#comment
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Tue, 08 Jun 2021 08:41:00 UTC
+record: -1

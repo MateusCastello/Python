@@ -1,0 +1,9 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: prime_numbers = ...
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/9515#comment
+status: Unchecked
+record: -1

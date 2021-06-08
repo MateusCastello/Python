@@ -1,0 +1,80 @@
+<h2>Any and all</h2>
+<html>
+ <head></head>
+ <body>
+  <p>By now, you certainly know that Python has a lot of different <strong>built-in functions</strong> that help developers work more efficiently. Built-in functions are always available, so you don't need to declare or import them. Just call such a function whenever you need it. You have already seen one of those functions, it is <code class="language-python">print()</code>. Today we will learn two more built-in functions <code class="language-python">any()</code> and <code class="language-python">all()</code> and find out how and when to use them.</p> 
+  <p>Be careful though, these functions work only with <strong>iterable </strong>objects, e.g. strings and lists. A list is iterable, so we will use it to illustrate the theoretical part and to show how <code class="language-python">any()</code> and <code class="language-python">all()</code> work.</p> 
+  <h2>Function any()</h2> 
+  <p>The result of the <code class="language-python">any()</code> function call is the boolean value: it returns <code class="language-python">True</code> if an element or a group of elements in an iterable object are evaluated <code class="language-python">True</code>. Otherwise, it returns <code class="language-python">False</code>. Let’s take a look at the example. Imagine that you and your friends, Jam and Andy, wrote a test and got your results in the form of a list with <code class="language-python">True</code> and <code class="language-python">False</code> values. The test is passed if at least one answer is correct. Now you need to check if you and your friends passed that test.</p> 
+  <pre><code class="language-python">your_results = [True, False, False]
+print(any(your_results))  # True</code></pre> 
+  <p>As you know, the value <code class="language-python">True</code> corresponds to 1, while <code class="language-python">False</code> can be represented by 0, therefore, you can replace the boolean values with the numerical ones in the list above and get the same result.</p> 
+  <pre><code class="language-python">your_results = [1, 0, 0]
+print(any(your_results))  # True</code></pre> 
+  <p>In fact, all numbers other than 0 will be regarded as <code class="language-python">True</code>, even the negative ones. That part stems from how the <a target="_blank" href="https://docs.python.org/3/library/functions.html#bool" rel="noopener noreferrer nofollow">bool()</a> function works.</p> 
+  <p>Now back to our test example, you passed with one correct answer. What about your friends, Jam and Andy? Andy has a different list of results to check.</p> 
+  <pre><code class="language-python">andy_results = [False, False, False]
+print(any(andy_results))  # False</code></pre> 
+  <p>Unfortunately, your friend Andy failed. What about Jam? Well, this friend of yours didn't write the test at all, so he got an empty list of results.</p> 
+  <pre><code class="language-python">jam_results = []
+print(any(jam_results))  # False</code></pre> 
+  <p>The list doesn't contain any elements, and since no <code class="language-python">True</code> value is to be found the <code class="language-python">any()</code> function returns <code class="language-python">False</code>.</p> 
+  <p>So what does the <code class="language-python">any()</code> function do? First, it takes a list as an argument, then evaluates all the elements of this list to find at least one <code class="language-python">True</code>, if so, it returns <code class="language-python">True</code>, otherwise, the result is <code class="language-python">False</code>.</p> 
+  <h2>Function all() </h2> 
+  <p>The <code class="language-python">all()</code> function works pretty much like <code class="language-python">any()</code>. The difference is that <code class="language-python">all()</code> function checks if all the elements of an iterable object are <code class="language-python">True</code> and returns <code class="language-python">True</code> if they are. Otherwise, you get <code class="language-python">False</code>. Do you remember the story from the previous section where we checked the results of the test? Let's proceed. Imagine yet another test, this time the final one. To succeed, you should answer all the questions correctly. How did it go this time for you and the two friends of yours?</p> 
+  <pre><code class="language-python">your_results = [True, False, False]
+print(all(your_results))  # False</code></pre> 
+  <p>As you can see, not all the answers in your case are correct, so you didn't pass the test. What about Andy's results?</p> 
+  <pre><code class="language-python">andy_results = [True, True, True]
+print(all(andy_results))  # True</code></pre> 
+  <p>Luckily, Andy passed. Jam seems to have a vacation. His list of results is empty again.</p> 
+  <pre><code class="language-python">jam_results = []
+print(all(jam_results))  # True</code></pre> 
+  <p>The list doesn't contain any elements, but the <code class="language-python">all()</code> function will return <code class="language-python">True</code> because it searches for any <code class="language-python">False</code> values. No <code class="language-python">False</code> values result in <code class="language-python">True</code>. Be careful with this scenario.</p> 
+  <h2>Non-boolean values</h2> 
+  <p>Pay attention to the fact that <code class="language-python">any()</code> and <code class="language-python">all()</code> can take a list containing non-boolean values. Let's recall how they are evaluated.</p> 
+  <p>Empty sequences, e.g. strings and lists, as well as zero, are equivalent to <code class="language-python">False</code>, the same applies to the constant <code class="language-python">None</code>. Non-empty sequences are equivalent to <code class="language-python">True</code>.</p> 
+  <p></p>
+  <div class="alert alert-warning">
+   Be cautious, the result of calling the 
+   <code class="language-python">all()</code> function on an empty sequence differs from converting an empty sequence to a boolean value. The result of 
+   <code class="language-python">all(list())</code> is 
+   <code class="language-python">True</code>, the result of 
+   <code class="language-python">bool(list())</code> is 
+   <code class="language-python">False</code>. 
+  </div>
+  <p></p> 
+  <p>Here is a list with false values. <code class="language-python">any()</code> and <code class="language-python">all()</code> will have the same behavior in this example:</p> 
+  <pre><code class="language-python">rocket_science_scores = [0, -0, 0.0, +0]
+any(rocket_science_scores)  # False
+all(rocket_science_scores)  # False</code></pre> 
+  <p>Now, let's look at the scores of some simpler subject:</p> 
+  <pre><code class="language-python">math_scores = [0, 1, 2, 3]
+any(math_scores)  # True
+all(math_scores)  # False</code></pre> 
+  <p>As shown, <code class="language-python">all()</code> doesn't return <code class="language-python">True</code> for a list where false values are present. Consider the last case:</p> 
+  <pre><code class="language-python">biology_scores = [1, 2, 3, 4]
+any(biology_scores)  # True
+all(biology_scores)  # True</code></pre> 
+  <p>The list <code class="language-python">biology_scores</code> has no false values, that's why both functions result in <code class="language-python">True</code>.</p> 
+  <p>Also, you can turn the elements of your list into the boolean values via comparison. Suppose, we have a list of scores and want to check whether some are equal to 3 or greater. It can be done like this:</p> 
+  <pre><code class="language-python">scores = [1, 2, 3, 4]
+boolean_scores = [score &gt;= 3 for score in scores]  # [False, False, True, True]
+print(any(boolean_scores))  # True
+print(all(boolean_scores))  # False</code></pre> 
+  <p>However, lists may contain different elements, e.g. strings or nested lists, in such cases, the behavior of <code class="language-python">any()</code> and <code class="language-python">all()</code> would depend largely on the contents. Keep that in mind.</p> 
+  <h2>Conditions</h2> 
+  <p>Coders often use <code class="language-python">any()</code> and <code class="language-python">all()</code> functions in conditions. It helps to check the elements of iterable objects quickly and to avoid complex constructions.</p> 
+  <p>Let's choose a candy box for Valentine's Day. Each box contains several types of sweets. But you are interested in the even amount of candies of each type because, obviously, you will share them with your valentine.</p> 
+  <pre><code class="language-python">box = [10, 20, 33]
+
+if any([candy % 2 for candy in box]):
+    print("It is not a proper gift.")
+else:
+    print("Perfect!")</code></pre> 
+  <p>Short and sweet, isn't it? Life is like a box of chocolates! As long as the values you deal with can be converted to <code class="language-python">True</code> and <code class="language-python">False</code>, it's safe to use both functions in conditions.</p> 
+  <h2>To sum up</h2> 
+  <p>We learned what <code class="language-python">any()</code> and <code class="language-python">all()</code> functions can do and how they work. As you can see, these functions are an efficient tool that helps check conditions and may improve the readability of your code.</p>
+ </body>
+</html>
+<a href="https://hyperskill.org/learn/step/7800">Show topic summary</a>
