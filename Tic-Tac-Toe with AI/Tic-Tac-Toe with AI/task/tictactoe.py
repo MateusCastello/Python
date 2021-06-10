@@ -1,16 +1,10 @@
 from winner import winner
-first_table = input("Enter the cells: > ")
-first_table = first_table.replace("_", " ")
+import computer_logic
+
+table = [[" ", " ", " "], [" ", " ", " "], [" ", " ", " "]]
+count = 0
 x_number = 0
 o_number = 0
-
-for item in first_table:
-    if item == "X":
-        x_number += 1
-    elif item == "O":
-        o_number += 1
-table = [[], [], []]
-count = 0
 game_over = False
 
 
@@ -21,37 +15,35 @@ def print_table(table):
     print("---------")
 
 
-for i in range(3):
-    for j in range(3):
-        table[i].append(first_table[count])
-        count += 1
-
 print_table(table)
 
 
 while not game_over:
-    coords = input("Enter the coordinates: ")
+    if x_number > o_number:
+        print('Making move level "easy"')
+        moves = computer_logic.get_valid_moves(table)
+        computer_logic.random_move(table, moves)
+        o_number += 1
 
-    if not coords[0].isdigit():
-        print("You should enter numbers!")
-        continue
     else:
-        line, row = coords.split()
+        coords = input("Enter the coordinates: ")
 
-    line = int(line)
-    row = int(row)
+        if not coords[0].isdigit():
+            print("You should enter numbers!")
+            continue
+        else:
+            line, row = coords.split()
 
-    if line < 1 or line > 3 or row < 1 or row > 3:
-        print("Coordinates should be from 1 to 3!")
-        continue
+        line = int(line)
+        row = int(row)
+
+        if line < 1 or line > 3 or row < 1 or row > 3:
+            print("Coordinates should be from 1 to 3!")
+            continue
     
-    if table[line-1][row-1] != " ":
-        print("This cell is occupied! Choose another one!")
-        continue
-    else:
-        if x_number > o_number:
-            table[line - 1][row - 1] = "O"
-            o_number += 1
+        if table[line-1][row-1] != " ":
+            print("This cell is occupied! Choose another one!")
+            continue
         else:
             table[line - 1][row - 1] = "X"
             x_number += 1
