@@ -7,3 +7,4 @@ n = int(input())
 # put your code here
 random.seed(n)
 print(random.randint(-100, 100))
+
