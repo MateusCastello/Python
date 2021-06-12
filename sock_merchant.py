@@ -1,4 +1,4 @@
-#Find the numbers of pairs of socks of the same color given a pile of socks
+# Find the numbers of pairs of socks of the same color given a pile of socks
 
 ar = [10, 20, 20, 10, 10, 30, 50, 10, 20, 70, 80, 20, 40, 70, 20, 30, 60, 50, 10, 10, 70, 70]
 
