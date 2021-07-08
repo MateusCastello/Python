@@ -21,7 +21,7 @@ while lives > 0 and has_won == False:
 
     if guess in letters_track:
         print(f"You have already guessed the letter {guess}")
-        print(letters_track)
+        print("Letters guessed to the moment", letters_track)
         continue
 
     if guess not in chosen_word:

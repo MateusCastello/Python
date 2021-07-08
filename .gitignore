@@ -4,3 +4,5 @@
 .idea/vcs.xml
 .idea/inspectionProfiles/profiles_settings.xml
 Math/2 Arithmetic/.ipynb_checkpoints/printing_equations-checkpoint.ipynb
+*.pyc
+*.ipynb_checkpoints
