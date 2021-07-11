@@ -14,3 +14,5 @@ operation = input("Insert the operation (+ - / *): ")
 first_number = input("Insert the firs number: ")
 second_number = input("Insert the second number: ")
 
+
+

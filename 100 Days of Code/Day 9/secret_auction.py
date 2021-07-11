@@ -31,3 +31,4 @@ while not is_finished:
     os.system('clear')
 
 find_highest_bidder(bids)
+
